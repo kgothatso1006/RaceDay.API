@@ -84,11 +84,6 @@ This project uses GitHub Actions for continuous integration. Every push to the m
 
 A video walkthrough of the API is available at: https://youtu.be/l6CfAFEo7yI
 
-## Author
-
-Kgothatso Mosipa
-Module: PROG6212
-Institution: The Independent Institute of Education (Pty) Ltd
 
 ## License
 
