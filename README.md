@@ -87,7 +87,6 @@ A video walkthrough of the API is available at: https://youtu.be/l6CfAFEo7yI
 ## Author
 
 Kgothatso Mosipa
-Student Number: [YOUR STUDENT NUMBER]
 Module: PROG6212
 Institution: The Independent Institute of Education (Pty) Ltd
 
