@@ -81,8 +81,6 @@ The test project RaceDay.API.Tests contains xUnit tests covering user registrati
 This project uses GitHub Actions for continuous integration. Every push to the main branch triggers checkout of the repository, setup of .NET 8.0, restore of NuGet packages, build in Release configuration, and running all unit tests. The workflow file is located at .github/workflows/dotnet.yml.
 
 
-
-
 ## License
 
 This project is created for academic purposes as part of the RaceDay Portfolio of Evidence (PoE).
