@@ -6,17 +6,23 @@ A RESTful Web API for managing road running, walking, and cycling events in Sout
 
 The RaceDay API is the backend for the RaceDay event management system. It allows Participants to browse events, enrol in race categories, and view their personal results. It allows Organisers to create and manage events, categories, and record participant results. The API uses JWT-based authentication with role-based access control to secure endpoints.
 
+The system is split into two main parts:
+1. **Part 2:** The RESTful API (`RaceDay.API`).
+2. **Part 3:** The MVC Frontend (`RaceDay.MVC`) that consumes the API, manages sessions, and handles image uploads.
+
 ## Technology Stack
 
 | Technology | Purpose |
 |---|---|
-| ASP.NET Core 8.0 | Web API framework |
+| ASP.NET Core 8.0 | Web API and MVC Framework |
 | Entity Framework Core 8.0 | ORM (Code-First) |
 | SQL Server (LocalDB) | Database |
 | JWT (JSON Web Tokens) | Authentication |
 | BCrypt.Net-Next | Password hashing |
 | Swagger / Swashbuckle | API documentation |
 | xUnit | Unit testing |
+| Azure Blob Storage | Image storage (Part 3) |
+| Docker | Containerization (Part 3) |
 | GitHub Actions | CI/CD pipeline |
 
 ## Setup Instructions
@@ -31,7 +37,9 @@ Step 3 - Run migrations: open the Package Manager Console (Tools > NuGet Package
 
 Step 4 - Run the API: press F5 in Visual Studio or run dotnet run --project RaceDay.API. The API will be available at Swagger UI localhost:7137/swagger and API base URL localhost:7137/api
 
-Step 5 - Run the tests: run dotnet test or in Visual Studio go to Test > Run All Tests.
+Step 5 - Run the MVC App: right-click `RaceDay.MVC` in Visual Studio and select Debug > Start New Instance. The app will open in your browser.
+
+Step 6 - Run the tests: run dotnet test or in Visual Studio go to Test > Run All Tests.
 
 ## API Endpoints
 
@@ -78,18 +86,22 @@ The test project RaceDay.API.Tests contains xUnit tests covering user registrati
 
 ## CI/CD Pipeline
 
-This project uses GitHub Actions for continuous integration. Every push to the main branch triggers checkout of the repository, setup of .NET 8.0, restore of NuGet packages, build in Release configuration, and running all unit tests. The workflow file is located at .github/workflows/dotnet.yml.
+This project uses GitHub Actions for continuous integration. Every push to the main branch triggers checkout of the repository, setup of .NET 8.0, restore of NuGet packages, build in Release configuration for both API and MVC, and running all unit tests. The workflow file is located at .github/workflows/dotnet.yml.
 
-## Video Walkthrough
+---
 
-A video walkthrough of the API is available at:https://youtu.be/l6CfAFEo7yI
+## Part 3: MVC Frontend, Azure Blob & Docker
 
-## Author
+This section contains the details for Part 3, which adds the frontend and cloud storage to the RaceDay system.
 
-Kgothatso Mosipa
-Module: PROG6212
-Institution: The Independent Institute of Education (Pty) Ltd
+### Features
+- **Role-Based Dashboards:** Separate interfaces for Organisers and Participants.
+- **Event Management:** Organisers can create events, upload banner images (via Azure Blob Storage), and manage race categories.
+- **Enrolments & Results:** Participants can enrol in categories, and Organisers can capture their finish times.
+- **Docker Integration:** The entire application (API, MVC, and Database) is containerized.
 
-## License
+### How to Run with Docker
+Ensure you have Docker Desktop installed and running. From the root directory of this repository, run:
 
-This project is created for academic purposes as part of the RaceDay Portfolio of Evidence (PoE).
+```bash
+docker-compose up --build
