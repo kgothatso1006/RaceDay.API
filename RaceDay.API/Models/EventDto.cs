@@ -29,5 +29,8 @@ namespace RaceDay.API.Models.DTOs
         [RegularExpression("^(Upcoming|Open|Completed|Cancelled)$",
             ErrorMessage = "Status must be one of: Upcoming, Open, Completed, Cancelled")]
         public string Status { get; set; } = "Upcoming";
+
+        // THE ONLY LINE YOU NEED TO ADD IS THIS ONE BELOW:
+        public string? BannerUrl { get; set; }
     }
 }

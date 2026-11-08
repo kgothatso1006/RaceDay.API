@@ -1,0 +1,87 @@
+﻿@model List<System.Text.Json.JsonElement>
+@{
+    ViewData["Title"] = "Manage Categories";
+    var eventDetails = ViewBag.EventDetails;
+    var eventName = eventDetails.GetProperty("eventName").GetString();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Manage Categories: @eventName</h2>
+        <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="row">
+        <!-- List of Categories -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Existing Categories</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Count == 0)
+                    {
+                        <p class="text-muted">No categories added yet.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Distance</th>
+                                    <th>Max Participants</th>
+                                    <th>Entry Fee</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cat in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@cat.GetProperty("categoryName").GetString()</td>
+                                        <td>@cat.GetProperty("distanceKm").GetDecimal() km</td>
+                                        <td>@cat.GetProperty("maxParticipants").GetInt32()</td>
+                                        <td>R @cat.GetProperty("entryFee").GetDecimal()</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Category Form -->
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Add New Category</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddCategory" method="post">
+                        <input type="hidden" name="eventId" value="@ViewBag.EventId" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Category Name (e.g., 5km Fun Run)</label>
+                            <input type="text" name="categoryName" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Distance (km)</label>
+                            <input type="number" step="0.01" name="distanceKm" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Max Participants</label>
+                            <input type="number" name="maxParticipants" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Entry Fee (R)</label>
+                            <input type="number" step="0.01" name="entryFee" class="form-control" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Add Category</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

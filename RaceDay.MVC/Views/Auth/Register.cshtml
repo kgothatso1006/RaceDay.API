@@ -1,0 +1,100 @@
+﻿@model RaceDay.MVC.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Register for RaceDay</h2>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+
+                    <form asp-action="Register" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" type="email" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input asp-for="Password" class="form-control" type="password" required minlength="6" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phone (Optional)</label>
+                            <input asp-for="Phone" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">I am a:</label>
+                            <select asp-for="Role" class="form-select" id="roleSelect" onchange="toggleRoleFields()">
+                                <option value="Participant">Participant</option>
+                                <option value="Organiser">Organiser</option>
+                            </select>
+                        </div>
+
+                        <div id="organiserFields" style="display:none;">
+                            <div class="mb-3">
+                                <label class="form-label">Organisation Name</label>
+                                <input asp-for="OrganisationName" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div id="participantFields">
+                            <div class="mb-3">
+                                <label class="form-label">Date of Birth</label>
+                                <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Emergency Contact</label>
+                                    <input asp-for="EmergencyContact" class="form-control" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Emergency Phone</label>
+                                    <input asp-for="EmergencyPhone" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Register</button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a asp-action="Login">Already have an account? Login here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleRoleFields() {
+        var role = document.getElementById("roleSelect").value;
+        if (role === "Organiser") {
+            document.getElementById("organiserFields").style.display = "block";
+            document.getElementById("participantFields").style.display = "none";
+        } else {
+            document.getElementById("organiserFields").style.display = "none";
+            document.getElementById("participantFields").style.display = "block";
+        }
+    }
+</script>

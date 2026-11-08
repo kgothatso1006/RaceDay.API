@@ -34,7 +34,10 @@ namespace RaceDay.API.Models
 
         [Required]
         [MaxLength(20)]
-        public string Status { get; set; } = "Upcoming"; // Upcoming, Open, Completed, Cancelled
+        public string Status { get; set; } = "Upcoming";
+
+        // THIS IS THE ONLY ONE YOU NEED
+        public string? BannerUrl { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

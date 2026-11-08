@@ -1,0 +1,71 @@
+﻿@model List<System.Text.Json.JsonElement>
+@{
+    ViewData["Title"] = "Event Enrolments";
+    var eventDetails = ViewBag.EventDetails;
+    var eventName = eventDetails.GetProperty("eventName").GetString();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Enrolments: @eventName</h2>
+        <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Enrolled Participants</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Count == 0)
+            {
+                <p class="text-muted">No participants have enrolled yet.</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Participant Name</th>
+                            <th>Category</th>
+                            <th>Race Number</th>
+                            <th>Record Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var enrol in Model)
+                        {
+                            var enrolmentId = enrol.GetProperty("enrolmentID").GetInt32();
+                            var participantName = enrol.GetProperty("participantName").GetString();
+                            var categoryName = enrol.GetProperty("categoryName").GetString();
+                            var raceNumber = enrol.GetProperty("raceNumber").GetString();
+
+                            <tr>
+                                <td class="fw-bold">@participantName</td>
+                                <td>@categoryName</td>
+                                <td>@raceNumber</td>
+                                <td>
+                                    <form asp-action="RecordResult" method="post" class="d-flex gap-2">
+                                        <input type="hidden" name="enrolmentId" value="@enrolmentId" />
+                                        <input type="hidden" name="eventId" value="@ViewBag.EventId" />
+                                        <input type="text" name="finishTime" class="form-control form-control-sm" placeholder="HH:mm:ss" style="width:100px;" required />
+                                        <input type="number" name="position" class="form-control form-control-sm" placeholder="Position" style="width:80px;" required />
+                                        <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

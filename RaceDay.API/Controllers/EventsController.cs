@@ -19,138 +19,57 @@ namespace RaceDay.API.Controllers
             _context = context;
         }
 
-        // Helper: Get the logged-in user's ID
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.Parse(userIdClaim!);
-        }
+        private async Task<int?> GetOrganiserId() => (await _context.Organisers.FirstOrDefaultAsync(o => o.UserID == int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value)))?.OrganiserID;
 
-        // Helper: Get the logged-in user's OrganiserID (or null if not an Organiser)
-        private async Task<int?> GetCurrentOrganiserId()
-        {
-            var userId = GetCurrentUserId();
-            var organiser = await _context.Organisers.FirstOrDefaultAsync(o => o.UserID == userId);
-            return organiser?.OrganiserID;
-        }
-
-        // GET: api/events  --  Any logged-in user
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAllEvents()
         {
-            var events = await _context.Events
-                .Include(e => e.Categories)
-                .OrderBy(e => e.EventDate)
-                .Select(e => new
-                {
-                    e.EventID,
-                    e.EventName,
-                    e.Description,
-                    e.EventDate,
-                    e.StartTime,
-                    e.Venue,
-                    e.Location,
-                    e.Status,
-                    CategoryCount = e.Categories.Count
-                })
-                .ToListAsync();
-
-            return Ok(events);
+            return Ok(await _context.Events.Include(e => e.Categories).OrderBy(e => e.EventDate).ToListAsync());
         }
 
-        // GET: api/events/{id}  --  Any logged-in user
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> GetEventById(int id)
         {
-            var ev = await _context.Events
-                .Include(e => e.Categories)
-                .Include(e => e.Organiser)
-                .FirstOrDefaultAsync(e => e.EventID == id);
-
-            if (ev == null)
-                return NotFound(new { message = "Event not found." });
-
-            var response = new
-            {
-                ev.EventID,
-                ev.EventName,
-                ev.Description,
-                ev.EventDate,
-                ev.StartTime,
-                ev.Venue,
-                ev.Location,
-                ev.Status,
-                ev.CreatedAt,
-                OrganiserName = ev.Organiser.OrganisationName,
-                Categories = ev.Categories.Select(c => new
-                {
-                    c.CategoryID,
-                    c.CategoryName,
-                    c.DistanceKm,
-                    c.MaxParticipants,
-                    c.EntryFee
-                })
-            };
-
-            return Ok(response);
+            var ev = await _context.Events.Include(e => e.Categories).Include(e => e.Organiser).FirstOrDefaultAsync(e => e.EventID == id);
+            return ev == null ? NotFound() : Ok(ev);
         }
 
-        // POST: api/events  --  Organiser only
         [HttpPost]
         [Authorize(Roles = "Organiser")]
         public async Task<IActionResult> CreateEvent([FromBody] EventDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var organiserId = await GetCurrentOrganiserId();
-            if (organiserId == null)
-                return Forbid(); // user claims Organiser role but has no Organiser profile
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var orgId = await GetOrganiserId();
+            if (orgId == null) return Forbid();
 
             var newEvent = new Event
             {
-                OrganiserID = organiserId.Value,
+                OrganiserID = orgId.Value,
                 EventName = dto.EventName,
                 Description = dto.Description,
                 EventDate = dto.EventDate,
                 StartTime = dto.StartTime,
                 Venue = dto.Venue,
                 Location = dto.Location,
-                Status = dto.Status,
-                CreatedAt = DateTime.UtcNow
+                Status = dto.Status
             };
 
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
 
-            return StatusCode(201, new
-            {
-                message = "Event created successfully.",
-                eventId = newEvent.EventID
-            });
+            return StatusCode(201, new { message = "Event created successfully.", eventId = newEvent.EventID });
         }
 
-        // PUT: api/events/{id}  --  Organiser only, only their own event
         [HttpPut("{id}")]
         [Authorize(Roles = "Organiser")]
         public async Task<IActionResult> UpdateEvent(int id, [FromBody] EventDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var organiserId = await GetCurrentOrganiserId();
-            if (organiserId == null)
-                return Forbid();
-
+            var orgId = await GetOrganiserId();
             var ev = await _context.Events.FirstOrDefaultAsync(e => e.EventID == id);
-
-            if (ev == null)
-                return NotFound(new { message = "Event not found." });
-
-            if (ev.OrganiserID != organiserId.Value)
-                return Forbid(); // Not their event
+            if (ev == null) return NotFound();
+            if (ev.OrganiserID != orgId) return Forbid();
 
             ev.EventName = dto.EventName;
             ev.Description = dto.Description;
@@ -161,40 +80,44 @@ namespace RaceDay.API.Controllers
             ev.Status = dto.Status;
 
             await _context.SaveChangesAsync();
-
             return Ok(new { message = "Event updated successfully." });
         }
 
-        // DELETE: api/events/{id}  --  Organiser only, only their own event
         [HttpDelete("{id}")]
         [Authorize(Roles = "Organiser")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
-            var organiserId = await GetCurrentOrganiserId();
-            if (organiserId == null)
-                return Forbid();
+            var orgId = await GetOrganiserId();
+            var ev = await _context.Events.Include(e => e.Categories).FirstOrDefaultAsync(e => e.EventID == id);
+            if (ev == null) return NotFound();
+            if (ev.OrganiserID != orgId) return Forbid();
 
-            var ev = await _context.Events
-                .Include(e => e.Categories)
-                .FirstOrDefaultAsync(e => e.EventID == id);
-
-            if (ev == null)
-                return NotFound(new { message = "Event not found." });
-
-            if (ev.OrganiserID != organiserId.Value)
-                return Forbid();
-
-            // Check if any categories have enrolments (business rule: cannot delete if enrolments exist)
-            var hasEnrolments = await _context.Enrolments
-                .AnyAsync(en => ev.Categories.Select(c => c.CategoryID).Contains(en.CategoryID));
-
-            if (hasEnrolments)
-                return Conflict(new { message = "Cannot delete this event because it has enrolments. Cancel it instead." });
+            if (await _context.Enrolments.AnyAsync(en => ev.Categories.Select(c => c.CategoryID).Contains(en.CategoryID)))
+                return Conflict(new { message = "Cannot delete event with enrolments." });
 
             _context.Events.Remove(ev);
             await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
-            return NoContent(); // 204
+        // --- NEW METHOD ADDED HERE ---
+        // POST: api/events/{id}/banner
+        [HttpPost("{id}/banner")]
+        [Authorize(Roles = "Organiser")]
+        public async Task<IActionResult> UploadBanner(int id, IFormFile file, [FromServices] RaceDay.API.Services.BlobService blobService)
+        {
+            var ev = await _context.Events.FirstOrDefaultAsync(e => e.EventID == id);
+            if (ev == null) return NotFound();
+            if (ev.OrganiserID != await GetOrganiserId()) return Forbid();
+
+            if (file == null || file.Length == 0) return BadRequest("No file uploaded.");
+
+            var imageUrl = await blobService.UploadFileAsync(file);
+
+            ev.BannerUrl = imageUrl;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Banner uploaded successfully.", url = imageUrl });
         }
     }
 }

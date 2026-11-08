@@ -1,0 +1,52 @@
+﻿@model List<System.Text.Json.JsonElement>
+@{
+    ViewData["Title"] = "Participant Dashboard";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Welcome, @Context.Session.GetString("UserName")!</h2>
+        <a asp-action="Logout" asp-controller="Auth" class="btn btn-danger">Logout</a>
+    </div>
+
+    <h4 class="mb-3">Upcoming Events</h4>
+
+    <div class="row">
+        @foreach (var ev in Model)
+        {
+            var eventId = ev.GetProperty("eventID").GetInt32();
+            var eventName = ev.GetProperty("eventName").GetString();
+            var description = ev.GetProperty("description").GetString();
+            var venue = ev.GetProperty("venue").GetString();
+            var location = ev.GetProperty("location").GetString();
+            var eventDate = ev.GetProperty("eventDate").GetDateTime();
+            var status = ev.GetProperty("status").GetString();
+
+            <div class="col-md-4 mb-4">
+                <div class="card shadow h-100">
+                    @if (ev.TryGetProperty("bannerUrl", out var bannerUrl) && bannerUrl.ValueKind != JsonValueKind.Null)
+                    {
+                        <img src="@bannerUrl.GetString()" class="card-img-top" alt="Event Banner" style="height: 150px; object-fit: cover;">
+                    }
+                    <div class="card-header bg-dark text-white d-flex justify-content-between">
+                        <span>@eventName</span>
+                        <span class="badge bg-success">@status</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-2"><small>@eventDate.ToString("dd MMM yyyy")</small></p>
+                        <p>@description</p>
+                        <hr />
+                        <p class="mb-1"><strong>Venue:</strong> @venue</p>
+                        <p class="mb-0"><strong>Location:</strong> @location</p>
+                    </div>
+                    <div class="card-footer">
+
+                        <!-- THIS IS THE FIXED LINK -->
+                        <a asp-action="EventDetails" asp-route-id="@eventId" class="btn btn-primary w-100">View Categories & Enrol</a>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
