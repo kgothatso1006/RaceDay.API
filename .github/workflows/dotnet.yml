@@ -1,0 +1,32 @@
+name: .NET Core CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build API
+      run: dotnet build RaceDay.API/RaceDay.API.csproj --no-restore --configuration Release
+
+    - name: Build MVC
+      run: dotnet build RaceDay.MVC/RaceDay.MVC.csproj --no-restore --configuration Release
+
+    - name: Run tests
+      run: dotnet test RaceDay.API.Tests/RaceDay.API.Tests.csproj --no-build --configuration Release --verbosity normal
