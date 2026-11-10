@@ -29,4 +29,4 @@ jobs:
       run: dotnet build RaceDay.MVC/RaceDay.MVC.csproj --no-restore --configuration Release
 
     - name: Run tests
-      run: dotnet test RaceDay.API.Tests/RaceDay.API.Tests.csproj --no-build --configuration Release --verbosity normal
+      run: dotnet test RaceDay.API.Tests/RaceDay.API.Tests.csproj --configuration Release --verbosity normal
