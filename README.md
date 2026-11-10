@@ -1,14 +1,14 @@
-# RaceDay API
+# RaceDay API & MVC System
 
-A RESTful Web API for managing road running, walking, and cycling events in South Africa. Built with ASP.NET Core 8.0 and Entity Framework Core using a Code-First approach.
+A full-stack event management platform for South African road running, walking, and cycling events. Built with ASP.NET Core 8.0 and Entity Framework Core using a Code-First approach.
 
 ## Project Overview
 
-The RaceDay API is the backend for the RaceDay event management system. It allows Participants to browse events, enrol in race categories, and view their personal results. It allows Organisers to create and manage events, categories, and record participant results. The API uses JWT-based authentication with role-based access control to secure endpoints.
+The RaceDay system allows Participants to browse events, enrol in race categories, and view their personal results. It allows Organisers to create and manage events, categories, record participant results, and upload event banners.
 
 The system is split into two main parts:
 1. **Part 2:** The RESTful API (`RaceDay.API`).
-2. **Part 3:** The MVC Frontend (`RaceDay.MVC`) that consumes the API, manages sessions, and handles image uploads.
+2. **Part 3:** The MVC Frontend (`RaceDay.MVC`) that consumes the API, manages sessions, and handles image uploads. The application is fully containerized using Docker.
 
 ## Technology Stack
 
@@ -25,21 +25,21 @@ The system is split into two main parts:
 | Docker | Containerization (Part 3) |
 | GitHub Actions | CI/CD pipeline |
 
-## Setup Instructions
+## Setup Instructions (Local)
 
-Prerequisites: .NET 8.0 SDK or newer, Visual Studio 2022 with ASP.NET workload, SQL Server LocalDB (installed with Visual Studio).
+Prerequisites: .NET 8.0 SDK or newer, Visual Studio 2022 with ASP.NET workload, SQL Server LocalDB.
 
 Step 1 - Clone this repository to your local machine.
 
-Step 2 - Configure the database: the connection string is already set in RaceDay.API/appsettings.json for LocalDB. If you use a different SQL Server instance, update the DefaultConnection value.
+Step 2 - Configure the database: the connection string is already set in `RaceDay.API/appsettings.json` for LocalDB. If you use a different SQL Server instance, update the `DefaultConnection` value.
 
-Step 3 - Run migrations: open the Package Manager Console (Tools > NuGet Package Manager > Package Manager Console) and run Update-Database. This creates the RaceDayDB database with all tables and seed data.
+Step 3 - Run migrations: open the Package Manager Console (Tools > NuGet Package Manager > Package Manager Console) and run `Update-Database`. This creates the RaceDayDB database.
 
-Step 4 - Run the API: press F5 in Visual Studio or run dotnet run --project RaceDay.API. The API will be available at Swagger UI localhost:7137/swagger and API base URL localhost:7137/api
+Step 4 - Run the API: right-click `RaceDay.API` in Visual Studio and select Debug > Start New Instance. Swagger will open at `https://localhost:7137/swagger`.
 
-Step 5 - Run the MVC App: right-click `RaceDay.MVC` in Visual Studio and select Debug > Start New Instance. The app will open in your browser.
+Step 5 - Run the MVC App: right-click `RaceDay.MVC` in Visual Studio and select Debug > Start New Instance. The web app will open in your browser.
 
-Step 6 - Run the tests: run dotnet test or in Visual Studio go to Test > Run All Tests.
+Step 6 - Run the tests: run `dotnet test` or in Visual Studio go to Test > Run All Tests.
 
 ## API Endpoints
 
@@ -82,11 +82,11 @@ DELETE /api/results/{id} (Organiser own)
 
 ## Unit Tests
 
-The test project RaceDay.API.Tests contains xUnit tests covering user registration and login (valid, duplicate, invalid credentials), role-based access control (401 Unauthorized, 403 Forbidden), event creation as Organiser (201) vs Participant (403), and enrolment flow with conflict detection (409). Run all tests with dotnet test.
+The test project `RaceDay.API.Tests` contains xUnit tests covering user registration and login (valid, duplicate, invalid credentials), role-based access control (401 Unauthorized, 403 Forbidden), event creation as Organiser (201) vs Participant (403), and enrolment flow with conflict detection (409). Run all tests with `dotnet test`.
 
 ## CI/CD Pipeline
 
-This project uses GitHub Actions for continuous integration. Every push to the main branch triggers checkout of the repository, setup of .NET 8.0, restore of NuGet packages, build in Release configuration for both API and MVC, and running all unit tests. The workflow file is located at .github/workflows/dotnet.yml.
+This project uses GitHub Actions for continuous integration. Every push to the main branch triggers checkout of the repository, setup of .NET 8.0, restore of NuGet packages, build in Release configuration for both API and MVC, and running all unit tests. The workflow file is located at `.github/workflows/dotnet.yml`.
 
 ---
 
@@ -98,8 +98,35 @@ This section contains the details for Part 3, which adds the frontend and cloud 
 - **Role-Based Dashboards:** Separate interfaces for Organisers and Participants.
 - **Event Management:** Organisers can create events, upload banner images (via Azure Blob Storage), and manage race categories.
 - **Enrolments & Results:** Participants can enrol in categories, and Organisers can capture their finish times.
-- **Docker Integration:** The entire application (API, MVC, and Database) is containerized.
 
+### Docker Run Instructions
+The entire application (API, MVC, and Database) is containerized. Ensure Docker Desktop is installed and running, then execute the following command in the root directory:
+
+docker-compose up --build
+
+- The MVC App will be available at: http://localhost:8081
+- The API will be available at: http://localhost:8080
+
+---
+
+## Video Walkthrough
+
+A video walkthrough demonstrating the API, MVC frontend, Azure Blob Storage, and Docker setup is available here:
+
+**YouTube:** https://youtu.be/bviBf0amBkE
+
+---
+
+## Author
+
+**Kgothatso Mosipa**
+Student Number: [YOUR STUDENT NUMBER]
+Module: PROG6212
+Institution: The Independent Institute of Education (Pty) Ltd
+
+## License
+
+This project is created for academic purposes as part of the RaceDay Portfolio of Evidence (PoE).
 ### How to Run with Docker
 Ensure you have Docker Desktop installed and running. From the root directory of this repository, run:
 
